@@ -1,2 +1,3 @@
 ignore/
 src/octave-workspace
+*.swp
