@@ -20,7 +20,7 @@ endfunction
 function coded = encode(e, bpf, lbs, ubs)
     coded = "";
     for i = 1:size(e,2)-1
-        itv = floor((e(1,i) - lbs(1,i)) * bpf(1,i) / (ubs(1,i) - lbs(1,i))) + 1;
+        itv = floor((e(1,i) - lbs(1,i)) * (bpf(1,i) - 1) / (ubs(1,i) - lbs(1,i))) + 1;
         coded = strcat(coded,dec2bin(bitset(0,itv,1),bpf(1,i)));
     endfor
     coded = strcat(coded,dec2bin(e(1,size(e,2)),bpf(1,size(e,2))));
