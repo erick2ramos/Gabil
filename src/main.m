@@ -2,15 +2,15 @@ source("utils.m");
 
 data = dlmread("../data/iris.data.modified3class.txt");
 
-figure(1);
-subplot(2,2,1);
-hist(data(:,1),30);
-subplot(2,2,2);
-hist(data(:,2),30);
-subplot(2,2,3);
-hist(data(:,3),30);
-subplot(2,2,4);
-hist(data(:,4),30);
+%figure(1);
+%subplot(2,2,1);
+%hist(data(:,1),30);
+%subplot(2,2,2);
+%hist(data(:,2),30);
+%subplot(2,2,3);
+%hist(data(:,3),30);
+%subplot(2,2,4);
+%hist(data(:,4),30);
 
 LB = min(data);
 UB = max(data);
@@ -34,17 +34,37 @@ for i = 1:Npop
     endfor
     population = [population; newpep];
 endfor
-fsum = 0;
+fsum = zeros(1, Npop);
 for i = 1:Npop
-    fsum += fitnessFn(population(i,:), featureTotal, examples);
+    fsum(i) = fitnessFn(population(i,:), featureTotal, examples);
 endfor
-fsum
 
 maxGenerations = 100;
 mutationRate = 0.2;
-selectionPercent = 0.5;
+selectionPercent = 0.01;
 nTrascendence = floor(selectionPercent * Npop);
 nMutations = ceil((Npop - 1)*Nvar*mutationRate);
 nMatings = ceil((Npop - nTrascendence)/2);
+maxFitness = 5;
 
+selection = @selectionFn;
+crossover = @crossoverFn;
+mutation = @mutationFn;
 
+gen = 0;
+while max(fsum) < maxFitness && gen < maxGenerations
+    newGen = [];
+    newGen = selection(population, fsum, selectionPercent);
+    newGen = [newGen; crossover(population, nMatings)];
+    newGen = mutation(newGen, mutationRate);
+    population = newGen;
+    fsum = zeros(1, size(population,1));
+    for i = 1:size(population,1)
+        fsum(i) = fitnessFn(population(i,:), featureTotal, examples); 
+    endfor
+    gen += 1;
+endwhile
+
+[x, index] = max(fsum);
+population(index,:)
+gen

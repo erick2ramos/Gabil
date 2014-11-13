@@ -13,8 +13,33 @@ function f = fitnessFn(x, fs, examples)
     f = f*f;
 endfunction
 
-function selection = selectionFn()
-    
+function selected = selectionFn(population, popFitness, selPercent)
+    selected = [];
+    pr = popFitness' ./ sum(popFitness);
+    for i=1:length(pr)
+        if pr(i) > selPercent
+            selected = [ selected; population(i) ];
+        endif
+    endfor
+endfunction
+
+function mutated = mutationFn(population, mutationRate)
+    mutated = population;
+    Npop = size(population, 1);
+    popPerm = randperm(Npop)(1:floor(Npop*mutationRate));
+    for i=1:length(popPerm)
+        cs = cellstr(mutated(popPerm(i),:));
+        csMut = randperm(length(cs{1}),1);
+        if cs{1}(csMut) == "0"
+            mutated(popPerm(i), csMut) = "0";
+        else
+            mutated(popPerm(i), csMut) = "1";
+        endif
+    endfor
+endfunction
+
+function crossed = crossoverFn(population, fitness)
+    crossed = population;
 endfunction
 
 function coded = encode(e, bpf, lbs, ubs)
