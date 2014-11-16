@@ -13,14 +13,11 @@ function f = fitnessFn(x, fs, examples)
     f = f*f;
 endfunction
 
-function selected = selectionFn(population, popFitness, selPercent)
+function selected = selectionFn(population, fitness, selPercent)
     selected = [];
-    pr = popFitness' ./ sum(popFitness);
-    for i=1:length(pr)
-        if pr(i) > selPercent
-            selected = [ selected; population(i) ];
-        endif
-    endfor
+    [oF iF] = sort(fitness ./ sum(fitness), 'descend');
+    selected = population(iF,:);
+    selected = selected(1:selPercent,:);
 endfunction
 
 function mutated = mutationFn(population, mutationRate)
@@ -38,8 +35,44 @@ function mutated = mutationFn(population, mutationRate)
     endfor
 endfunction
 
-function crossed = crossoverFn(population, fitness)
-    crossed = population;
+function crossed = crossoverFn(population, fitness, bpf, nMatings)
+    crossed = [];
+    if mod(nMatings,2) != 0
+        nMatings += 1;
+    endif
+    [oF iF] = sort(fitness ./ sum(fitness), 'descend');
+    matingPool = population(iF,:);
+    matingPool = matingPool(1:nMatings,:);
+    matingPool = matingPool(randperm(nMatings),:);
+    for i=1:2:size(matingPool,1)
+        ma = cellstr(matingPool(i,:)){1};
+        pa = cellstr(matingPool(i+1,:)){1};
+        M = randperm(length(ma) - 1 - 1, 1) + 1;
+        maPoints = [M (randperm(length(ma) - M,1) + M)];
+        paPoints = [mod(maPoints(1), length(pa))+1 mod(maPoints(2), length(pa))+1];
+        ch1 = "";
+        ch2 = "";
+        for i = 1:maPoints(1)
+            ch2 = strcat(ch2,ma(i));
+        endfor
+        for i = 1:paPoints(1)
+            ch1 = strcat(ch1,pa(i));
+        endfor
+        for i=maPoints(1) + 1 : maPoints(2) - 1;
+            ch1 = strcat(ch1,ma(i));
+        end
+        for i=paPoints(1) + 1:paPoints(2) - 1;
+            ch2 = strcat(ch2,pa(i));
+        end
+        for i = maPoints(2) : length(ma)
+            ch2 = strcat(ch2,ma(i));
+        endfor
+        for i = paPoints(2) : length(pa)
+            ch1 = strcat(ch1,pa(i));
+        endfor
+        crossed = [crossed; ch1];
+        crossed = [crossed; ch2];
+    endfor
 endfunction
 
 function coded = encode(e, bpf, lbs, ubs)
