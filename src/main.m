@@ -51,6 +51,8 @@ selection = @selectionFn;
 crossover = @crossoverFn;
 mutation = @mutationFn;
 
+tFsum = cell(maxGenerations,1);
+
 gen = 0;
 while max(fsum) < maxFitness && gen < maxGenerations
     newGen = [];
@@ -58,10 +60,12 @@ while max(fsum) < maxFitness && gen < maxGenerations
     newGen = [newGen; crossover(population, fsum, bitsPerFeature, nMatings)];
     newGen = mutation(newGen, mutationRate);
     population = newGen;
+    tFsum{gen + 1} = max(fsum);
     fsum = zeros(1, size(population,1));
     for i = 1:size(population,1)
         fsum(i) = fitnessFn(population(i,:), featureTotal, examples); 
     endfor
+    tFsum = [ tFsum; fsum ];
     Npop = size(population,1);
     nTrascendence = floor(selectionPercent * Npop);
     nMutations = ceil((Npop - 1)*Nvar*mutationRate);
@@ -71,4 +75,6 @@ endwhile
 toc()
 [x, index] = max(fsum);
 population(index,:)
+%figure(1);
+%plot(0:length(tFsum),tFsum{:})
 gen

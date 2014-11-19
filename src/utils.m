@@ -52,22 +52,22 @@ function crossed = crossoverFn(population, fitness, bpf, nMatings)
         paPoints = [mod(maPoints(1), length(pa))+1 mod(maPoints(2), length(pa))+1];
         ch1 = "";
         ch2 = "";
-        for i = 1:maPoints(1)
+        for i = 1:maPoints(1)-1
             ch2 = strcat(ch2,ma(i));
         endfor
-        for i = 1:paPoints(1)
+        for i = 1:paPoints(1)-1
             ch1 = strcat(ch1,pa(i));
         endfor
-        for i=maPoints(1) + 1 : maPoints(2) - 1;
+        for i=maPoints(1): maPoints(2);
             ch1 = strcat(ch1,ma(i));
         end
-        for i=paPoints(1) + 1:paPoints(2) - 1;
+        for i=paPoints(1): paPoints(2);
             ch2 = strcat(ch2,pa(i));
         end
-        for i = maPoints(2) : length(ma)
+        for i = maPoints(2) + 1 : length(ma)
             ch2 = strcat(ch2,ma(i));
         endfor
-        for i = paPoints(2) : length(pa)
+        for i = paPoints(2) + 1 : length(pa)
             ch1 = strcat(ch1,pa(i));
         endfor
         crossed = [crossed; ch1];
@@ -90,4 +90,31 @@ function rcoded = randCoded(t)
         rcoded = bitset(rcoded,i,round(rand));
     endfor
     rcoded = dec2bin(rcoded,t);
+endfunction
+
+function class = test(sub, classifier, bpf, lbs, ubs)
+    subCod = encode(sub, bpf, lbs, ubs);
+    cs = cellstr(classifier){1};
+    csL = length(cs);
+    fTotal = sum(bpf);
+    nRules = csL/fTotal;
+    subFeatures = substr(subCod, 1, fTotal - bpf(length(bpf)));
+    subClass = substr(subCod, fTotal - bpf(length(bpf)) + 1, bpf(length(bpf)));
+    found = false;
+    for i=1:nRules
+        ruleNumber = ((i - 1) * fTotal) + 1;
+        rule = substr(cs, ruleNumber, fTotal - bpf(length(bpf)));
+        ruleClass = substr(cs, ruleNumber + fTotal - bpf(length(bpf)) + 1, bpf(length(bpf)));
+        match = bitand(bin2dec(rule),bin2dec(subFeatures)) == bin2dec(subFeatures);
+        if match
+            fprintf('Classification: %s\n', ruleClass);
+            fprintf('Real Class: %s\n', subClass);
+            class = ruleClass;
+            found = true;
+            break
+        endif
+    endfor
+    if !found
+        fprintf('No class found\n');
+    endif
 endfunction
