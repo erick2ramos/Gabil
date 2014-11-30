@@ -21,7 +21,7 @@ Nvar = length(bitsPerFeature);
 featureTotal = sum(bitsPerFeature);
 
 
-validationPool = data(randperm(size(data,1),75),:);
+validationPool = data(randperm(size(data,1),50),:);
 examples = [];
 for i = 1:size(validationPool,1)
     examples = [examples; encode(validationPool(i,:), bitsPerFeature, LB, UB)];
